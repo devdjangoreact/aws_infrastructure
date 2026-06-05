@@ -36,6 +36,9 @@ variable "bucket_name" {
 
 resource "aws_s3_bucket" "state" {
   #checkov:skip=CKV_AWS_18:This bootstrap bucket stores Terraform state only; versioning and encryption are enabled.
+  #checkov:skip=CKV_AWS_144:Cross-region replication is unnecessary for this single-region free-tier state bucket.
+  #checkov:skip=CKV_AWS_145:AES256 server-side encryption is sufficient for this Terraform state bucket.
+  #checkov:skip=CKV2_AWS_61:Lifecycle cleanup is intentionally omitted so Terraform state history remains available.
   #checkov:skip=CKV2_AWS_62:State object changes are managed by Terraform locking; event notifications are not needed.
   bucket = var.bucket_name
 
