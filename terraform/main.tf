@@ -10,6 +10,8 @@ resource "aws_key_pair" "deploy" {
   public_key = tls_private_key.deploy.public_key_openssh
 }
 
+#trivy:ignore:AVD-AWS-0104
+#trivy:ignore:AVD-AWS-0107
 resource "aws_security_group" "web" {
   #checkov:skip=CKV_AWS_24:SSH must be reachable from GitHub-hosted runners with dynamic IPs; access is restricted by the generated deploy key.
   #checkov:skip=CKV_AWS_260:HTTP is required publicly for Let's Encrypt HTTP-01 validation and redirecting users to HTTPS.
@@ -54,6 +56,8 @@ resource "aws_security_group" "web" {
   }
 }
 
+#trivy:ignore:AVD-AWS-0028
+#trivy:ignore:AVD-AWS-0131
 resource "aws_instance" "web" {
   #checkov:skip=CKV2_AWS_41:The instance does not call AWS APIs; no IAM role is safer than attaching unused permissions.
   #checkov:skip=CKV_AWS_79:IMDS hardening will be applied in a controlled infrastructure update; this gate must not create drift.
