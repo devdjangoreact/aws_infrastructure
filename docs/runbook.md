@@ -9,6 +9,11 @@ Everything below is created by this repo; no manual AWS console clicks are requi
 Cloudflare credentials.
 
 ```bash
+# 0. DNS cutover preflight: delete existing apex A-records (mail/MX untouched), once.
+#    PowerShell (local):
+#      $env:CLOUDFLARE_API_TOKEN='...'; ./scripts/preflight-dns.ps1 -DryRun   # preview
+#      $env:CLOUDFLARE_API_TOKEN='...'; ./scripts/preflight-dns.ps1           # delete
+
 # 1. Create the S3 state bucket (local state, runs once)
 cd terraform/bootstrap
 terraform init
