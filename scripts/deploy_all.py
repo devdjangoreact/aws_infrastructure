@@ -63,6 +63,7 @@ SECRET_ENV_KEYS = [
     "CLOUDFLARE_EMAIL",
     "AWS_ACCESS_KEY_ID",
     "AWS_SECRET_ACCESS_KEY",
+    "AWS_SESSION_TOKEN",
     "AWS_REGION",
     "AWS_BUCKET_NAME",
     "ECR_PUBLIC_ALIAS",
@@ -508,6 +509,28 @@ def _ensure_branch_pushed(repo: str, token: str, branch: str) -> None:
         )
 
 
+def validate_aws_credentials(env: dict[str, str]) -> None:
+    """Verify the AWS credentials from .env before syncing them to GitHub Secrets."""
+    require(env, "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION")
+    aws_env = {
+        "AWS_ACCESS_KEY_ID": env["AWS_ACCESS_KEY_ID"],
+        "AWS_SECRET_ACCESS_KEY": env["AWS_SECRET_ACCESS_KEY"],
+        "AWS_REGION": env["AWS_REGION"],
+    }
+    if env.get("AWS_SESSION_TOKEN"):
+        aws_env["AWS_SESSION_TOKEN"] = env["AWS_SESSION_TOKEN"]
+    result = subprocess.run(
+        ["aws", "sts", "get-caller-identity"],
+        env={**os.environ, **aws_env},
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        die("AWS credentials from .env are invalid; update AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY"
+            " (and AWS_SESSION_TOKEN if these are temporary credentials), then rerun")
+    log("AWS credentials verified")
+
+
 def phase_secrets(env: dict[str, str]) -> None:
     step("Push GitHub Actions secrets from .env")
     from nacl import encoding, public  # local import: only needed for this phase
@@ -515,6 +538,8 @@ def phase_secrets(env: dict[str, str]) -> None:
     token = _github_token(env)
     repo = _repo_slug()
     log(f"target repository: {repo}")
+
+    validate_aws_credentials(env)
 
     # Collect secret name -> value. Region for EC2/S3 comes from .env; ECR Public is separate.
     secrets: dict[str, str] = {}
