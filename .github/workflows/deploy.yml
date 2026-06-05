@@ -1,13 +1,10 @@
 name: Deploy
 
 on:
-  # Infrastructure updates run only after Security succeeds for a push/merge to main.
-  workflow_run:
-    workflows: [Security]
-    types: [completed]
+  # Infrastructure updates are triggered only by Security after a successful push/merge to main.
   # App-repos signal a single-service redeploy after pushing a new image (not a branch push).
   repository_dispatch:
-    types: [deploy]
+    types: [deploy, infra-deploy]
 
 permissions:
   contents: read
@@ -18,14 +15,6 @@ concurrency:
 
 jobs:
   deploy:
-    if: >
-      github.event_name == 'repository_dispatch' ||
-      (
-        github.event_name == 'workflow_run' &&
-        github.event.workflow_run.conclusion == 'success' &&
-        github.event.workflow_run.event == 'push' &&
-        github.event.workflow_run.head_branch == 'main'
-      )
     runs-on: ubuntu-latest
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
@@ -33,11 +22,9 @@ jobs:
     steps:
       - name: Checkout infra-repo
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
       - name: Validate dispatch payload
-        if: github.event_name == 'repository_dispatch'
+        if: github.event.action == 'deploy'
         env:
           SERVICE_NAME: ${{ github.event.client_payload.service_name }}
           DOMAIN: ${{ github.event.client_payload.domain }}
@@ -95,7 +82,7 @@ jobs:
           fi
 
       - name: Deploy changed service over SSH
-        if: github.event_name == 'repository_dispatch'
+        if: github.event.action == 'deploy'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -108,7 +95,7 @@ jobs:
               bash scripts/deploy.sh '${{ github.event.client_payload.service_name }}' '${{ github.event.client_payload.image_tag }}'
 
       - name: Wait for service to settle
-        if: github.event_name == 'repository_dispatch'
+        if: github.event.action == 'deploy'
         run: sleep 15
 
       - name: Run validation suite
