@@ -1,8 +1,7 @@
 name: Security
 
-# Security and IaC quality gates. Runs independently of deploy.yml and never
-# touches infrastructure: secret scanning, Terraform security/lint, image and
-# shell-script analysis.
+# Security and IaC quality gate. On main pushes this must pass before deploy.yml
+# is allowed to touch infrastructure.
 
 on:
   push:
@@ -14,25 +13,19 @@ permissions:
   contents: read
 
 jobs:
-  gitleaks:
-    name: Secret scan (Gitleaks)
+  security:
+    name: Security gate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout (full history)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  terraform:
-    name: Terraform lint + IaC scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
 
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@v4
@@ -53,13 +46,6 @@ jobs:
           quiet: true
           soft_fail: false
 
-  trivy:
-    name: Container & config scan (Trivy)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Trivy config scan (Dockerfile / misconfig)
         uses: aquasecurity/trivy-action@0.28.0
         with:
@@ -77,12 +63,6 @@ jobs:
           ignore-unfixed: true
           exit-code: '1'
 
-  shellcheck:
-    name: Shell script analysis (ShellCheck)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@master
         with:

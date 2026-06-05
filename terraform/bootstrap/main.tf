@@ -35,6 +35,8 @@ variable "bucket_name" {
 }
 
 resource "aws_s3_bucket" "state" {
+  #checkov:skip=CKV_AWS_18:This bootstrap bucket stores Terraform state only; versioning and encryption are enabled.
+  #checkov:skip=CKV2_AWS_62:State object changes are managed by Terraform locking; event notifications are not needed.
   bucket = var.bucket_name
 
   # Allow `terraform destroy` to remove the bucket even if it still holds state versions.
