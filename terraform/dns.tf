@@ -4,7 +4,7 @@
 resource "cloudflare_dns_record" "site" {
   for_each = local.services
 
-  zone_id = var.cloudflare_zone_ids[each.key]
+  zone_id = data.cloudflare_zone.site[each.key].zone_id
   name    = each.key
   type    = "A"
   content = aws_eip.web.public_ip

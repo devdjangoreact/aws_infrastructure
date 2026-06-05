@@ -10,28 +10,14 @@ variable "instance_type" {
   default     = "t2.micro"
 }
 
-variable "ami_id" {
-  description = "Ubuntu 22.04 LTS AMI id for the chosen region."
-  type        = string
-}
-
-variable "ssh_public_key" {
-  description = "Contents of the project deploy public key (.ssh/project_key.pub)."
-  type        = string
-}
-
 variable "ssh_allowed_cidrs" {
-  description = "CIDR ranges allowed to reach SSH (22). Restrict to CI/bastion ranges."
+  description = "CIDR ranges allowed to reach SSH (22). Restrict to CI/bastion ranges in production."
   type        = list(string)
+  default     = ["0.0.0.0/0"]
 }
 
 variable "cloudflare_api_token" {
   description = "Cloudflare API token with DNS edit on the managed zones."
   type        = string
   sensitive   = true
-}
-
-variable "cloudflare_zone_ids" {
-  description = "Map of managed domain => Cloudflare zone id."
-  type        = map(string)
 }

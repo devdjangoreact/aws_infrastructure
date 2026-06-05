@@ -1,6 +1,23 @@
+# Generate the deploy SSH key pair (written locally, git-ignored under .ssh/).
+resource "tls_private_key" "deploy" {
+  algorithm = "ED25519"
+}
+
+resource "local_sensitive_file" "deploy_private_key" {
+  content         = tls_private_key.deploy.private_key_openssh
+  filename        = "${path.module}/../.ssh/project_key"
+  file_permission = "0600"
+}
+
+resource "local_file" "deploy_public_key" {
+  content         = tls_private_key.deploy.public_key_openssh
+  filename        = "${path.module}/../.ssh/project_key.pub"
+  file_permission = "0644"
+}
+
 resource "aws_key_pair" "deploy" {
   key_name   = "${local.project}-deploy"
-  public_key = var.ssh_public_key
+  public_key = tls_private_key.deploy.public_key_openssh
 }
 
 resource "aws_security_group" "web" {
@@ -8,7 +25,7 @@ resource "aws_security_group" "web" {
   description = "Traefik ingress (80/443) and restricted SSH (22)."
 
   ingress {
-    description = "SSH (restricted)"
+    description = "SSH (restrict in production)"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -45,7 +62,7 @@ resource "aws_security_group" "web" {
 }
 
 resource "aws_instance" "web" {
-  ami                    = var.ami_id
+  ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type
   key_name               = aws_key_pair.deploy.key_name
   vpc_security_group_ids = [aws_security_group.web.id]
@@ -64,4 +81,11 @@ resource "aws_eip" "web" {
   tags = {
     Project = local.project
   }
+}
+
+# One Amazon ECR Public repository per service (created by this repo).
+resource "aws_ecrpublic_repository" "site" {
+  for_each = local.services
+
+  repository_name = each.value
 }

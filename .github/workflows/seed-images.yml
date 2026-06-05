@@ -1,0 +1,46 @@
+name: Seed Initial Images
+
+# Phase 1 only: this infra-repo builds and pushes the FIRST image for all 6 sites
+# to Amazon ECR Public. After this, each app-repo builds new versions of its own image.
+# Run manually after the ECR Public repositories exist (terraform apply).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [buyraq, codehelp, cosmeticpro, ddnsteltonicka, solovkadmytro, solovkaskincare]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR Public
+        run: |
+          aws ecr-public get-login-password --region us-east-1 \
+            | docker login --username AWS --password-stdin public.ecr.aws
+
+      - name: Build and push initial image
+        env:
+          ALIAS: ${{ secrets.ECR_PUBLIC_ALIAS }}
+          SERVICE: ${{ matrix.service }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          IMAGE="public.ecr.aws/${ALIAS}/${SERVICE}"
+          docker build -t "${IMAGE}:${SHA}" -t "${IMAGE}:latest" \
+            -f templates/app-repo/Dockerfile "sites/${SERVICE}"
+          docker push "${IMAGE}:${SHA}"
+          docker push "${IMAGE}:latest"

@@ -3,6 +3,32 @@
 Operational guide for the static sites infrastructure. See `specs/001-infra-static-sites/` for the
 full spec, plan, and tasks.
 
+## One-time bootstrap (Phase 1, run from this repo)
+
+Everything below is created by this repo; no manual AWS console clicks are required beyond AWS/
+Cloudflare credentials.
+
+```bash
+# 1. Create the S3 state bucket (local state, runs once)
+cd terraform/bootstrap
+terraform init
+terraform apply -var="bucket_name=$AWS_BUCKET_NAME"
+
+# 2. Provision EC2, Elastic IP, security group, SSH key, ECR Public repos, and DNS A-records
+cd ..
+terraform init -backend-config="bucket=$AWS_BUCKET_NAME" -backend-config="region=$AWS_REGION"
+export TF_VAR_cloudflare_api_token=...   # or via .env / CI secret
+terraform plan    # review: 6 site A-records only, NO mail-record changes
+terraform apply   # creates infra; writes deploy key to .ssh/project_key(.pub)
+
+# 3. Seed the first images for all 6 sites (GitHub Actions: "Seed Initial Images" workflow,
+#    or locally with docker build/push using sites/<service> + templates/app-repo/Dockerfile)
+```
+
+Terraform auto-discovers the Ubuntu 22.04 AMI, looks up each Cloudflare zone id by domain, and
+generates the deploy SSH key pair into `.ssh/` (git-ignored). Copy `.ssh/project_key` contents into
+the `EC2_SSH_PRIVATE_KEY` GitHub secret for CI deploys.
+
 ## First-run (manual) bring-up on EC2
 
 ```bash

@@ -1,6 +1,15 @@
 <!--
 Sync Impact Report
 ==================
+Version change: 1.2.1 → 1.3.0
+Bump rationale: Terraform remote-state locking moved from DynamoDB to native S3 locking
+(`use_lockfile`, Terraform >= 1.11); DynamoDB-based locking is deprecated and removed from the
+project. Materially changed guidance in Principle V → MINOR.
+
+Modified principles:
+  - V. Infrastructure as Code, Plan-Only in CI (S3 native locking replaces DynamoDB)
+
+--- History ---
 Version change: 1.2.0 → 1.2.1
 Bump rationale: Clarified the SSH deploy key as the project key pair in `.ssh/`
 (`project_key` / `project_key.pub`) and added `.ssh/` to the required `.gitignore` exclusions in
@@ -138,7 +147,8 @@ All infrastructure is declared in Terraform and validated before it is changed.
 - Terraform manages: the EC2 instance, security group, key pair, and Cloudflare DNS A records for
   all 6 domains (`type = A`, `proxied = false`, `TTL = 60`).
 - Remote state lives in the S3 bucket (`AWS_BUCKET_NAME`) under a `terraform.tfstate` key, with
-  state locking via DynamoDB.
+  native S3 state locking (`use_lockfile`, Terraform >= 1.11). DynamoDB-based locking is deprecated
+  and is not used.
 - CI runs `terraform plan` ONLY. `terraform apply` is manual or gated behind a protected workflow
   requiring explicit approval.
 - A successful CI plan MUST show zero drift; any non-zero plan is treated as a failure to
@@ -270,4 +280,4 @@ Phase 1 is complete when ALL of the following hold:
   with the relevant principles. The automated validation gates (Principle VII) are the runtime
   enforcement of this constitution; a red gate blocks merge/deploy.
 
-**Version**: 1.2.1 | **Ratified**: 2026-06-05 | **Last Amended**: 2026-06-05
+**Version**: 1.3.0 | **Ratified**: 2026-06-05 | **Last Amended**: 2026-06-05

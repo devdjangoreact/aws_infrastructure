@@ -14,8 +14,7 @@ git-ignored `.env` and in GitHub; see `.env.example` for the variable list.
 | `AWS_ACCESS_KEY_ID` | AWS credentials (EC2, S3 state, ECR Public) |
 | `AWS_SECRET_ACCESS_KEY` | AWS credentials |
 | `AWS_REGION` | `us-east-1` |
-| `AWS_BUCKET_NAME` | S3 bucket for Terraform remote state |
-| `AWS_TF_LOCK_TABLE` | DynamoDB table for Terraform state locking |
+| `AWS_BUCKET_NAME` | S3 bucket for Terraform remote state (native S3 locking, no DynamoDB) |
 | `ECR_PUBLIC_ALIAS` | Amazon ECR Public registry alias |
 | `EC2_HOST` | EC2 host/IP for SSH deploy |
 | `EC2_SSH_PRIVATE_KEY` | Deploy private key material (from `.ssh/project_key`) |

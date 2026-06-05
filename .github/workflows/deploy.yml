@@ -59,7 +59,6 @@ jobs:
         run: |
           terraform init \
             -backend-config="bucket=${{ secrets.AWS_BUCKET_NAME }}" \
-            -backend-config="dynamodb_table=${{ secrets.AWS_TF_LOCK_TABLE }}" \
             -backend-config="region=${{ secrets.AWS_REGION }}"
 
       - name: Terraform validate
