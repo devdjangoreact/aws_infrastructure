@@ -504,6 +504,11 @@ def _ensure_branch_pushed(repo: str, token: str, branch: str) -> None:
             "not from this working tree. Commit and push the changes first."
         )
 
+    # When already on main, the commit is promoted directly by _push_head_to_main, so there is
+    # nothing to compare against yet. Only feature branches must already exist on the remote.
+    if branch == "main":
+        return
+
     local_sha = run_capture(["git", "rev-parse", "HEAD"]).strip()
     try:
         remote_ref = _gh_request("GET", f"/repos/{repo}/git/ref/heads/{branch}", token)
