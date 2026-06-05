@@ -1,0 +1,13 @@
+.git/
+.github/
+.cursor/
+.specify/
+specs/
+docs/
+compose/
+scripts/
+templates/
+.env*
+.ssh/
+*.pem
+*.key

@@ -1,0 +1,103 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  repository_dispatch:
+    types: [deploy]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-infra
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      ECR_PUBLIC_ALIAS: ${{ secrets.ECR_PUBLIC_ALIAS }}
+    steps:
+      - name: Checkout infra-repo
+        uses: actions/checkout@v4
+
+      - name: Validate dispatch payload
+        if: github.event_name == 'repository_dispatch'
+        env:
+          SERVICE_NAME: ${{ github.event.client_payload.service_name }}
+          DOMAIN: ${{ github.event.client_payload.domain }}
+          IMAGE_TAG: ${{ github.event.client_payload.image_tag }}
+        run: |
+          set -euo pipefail
+          case "${SERVICE_NAME}:${DOMAIN}" in
+            buyraq:buyraq.com) ;;
+            codehelp:codehelp.pp.ua) ;;
+            cosmeticpro:cosmeticpro.pp.ua) ;;
+            ddnsteltonicka:ddnsteltonicka.pp.ua) ;;
+            solovkadmytro:solovkadmytro.pp.ua) ;;
+            solovkaskincare:solovkaskincare.pp.ua) ;;
+            *) echo "::error::invalid service/domain pairing '${SERVICE_NAME}/${DOMAIN}'"; exit 1 ;;
+          esac
+          if [ -z "${IMAGE_TAG}" ]; then
+            echo "::error::image_tag is required"; exit 1
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init
+        working-directory: terraform
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.AWS_BUCKET_NAME }}" \
+            -backend-config="dynamodb_table=${{ secrets.AWS_TF_LOCK_TABLE }}" \
+            -backend-config="region=${{ secrets.AWS_REGION }}"
+
+      - name: Terraform validate
+        working-directory: terraform
+        run: terraform validate
+
+      - name: Terraform plan (plan-only, must show zero drift)
+        working-directory: terraform
+        env:
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          terraform plan -input=false -detailed-exitcode -out=tfplan
+          code=$?
+          if [ "$code" -eq 1 ]; then
+            echo "::error::terraform plan failed"; exit 1
+          fi
+          if [ "$code" -eq 2 ]; then
+            echo "::error::terraform drift detected (plan is non-empty)"; exit 1
+          fi
+
+      - name: Deploy changed service over SSH
+        if: github.event_name == 'repository_dispatch'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          envs: ECR_PUBLIC_ALIAS
+          script: |
+            cd ~/infra-repo
+            ECR_PUBLIC_ALIAS='${{ secrets.ECR_PUBLIC_ALIAS }}' \
+              bash scripts/deploy.sh '${{ github.event.client_payload.service_name }}' '${{ github.event.client_payload.image_tag }}'
+
+      - name: Wait for service to settle
+        if: github.event_name == 'repository_dispatch'
+        run: sleep 15
+
+      - name: Run validation suite
+        env:
+          EXPECTED_IP: ${{ secrets.EC2_HOST }}
+        run: bash scripts/validate.sh

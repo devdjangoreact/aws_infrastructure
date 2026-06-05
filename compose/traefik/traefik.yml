@@ -1,0 +1,34 @@
+# Traefik v3 static configuration.
+# Dynamic routing is provided by Docker labels on each app service.
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  websecure:
+    address: ":443"
+
+providers:
+  docker:
+    exposedByDefault: false
+    network: web
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "admin@buyraq.com"
+      storage: "/letsencrypt/acme.json"
+      httpChallenge:
+        entryPoint: web
+
+# Dashboard disabled in production.
+api:
+  dashboard: false
+
+log:
+  level: INFO

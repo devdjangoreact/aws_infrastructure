@@ -20,11 +20,11 @@ independently where possible.
 
 **Purpose**: Establish repository layout, shared configuration, and safe defaults.
 
-- [ ] T001 Create infra-repo directory layout in `terraform/`, `compose/traefik/`, `scripts/`, and `.github/workflows/`
-- [ ] T002 [P] Add shared domain/service map documentation in `docs/domain-service-map.md`
-- [ ] T003 [P] Add non-secret environment reference updates in `.env.example`
-- [ ] T004 [P] Add repository hygiene rules in `.gitignore` for `.env`, `.ssh/`, `*.pem`, `*.key`, `acme.json`, `terraform.tfvars`, and `.terraform/`
-- [ ] T005 Add GitHub Actions environment variable naming notes in `docs/github-secrets.md`
+- [X] T001 Create infra-repo directory layout in `terraform/`, `compose/traefik/`, `scripts/`, and `.github/workflows/`
+- [X] T002 [P] Add shared domain/service map documentation in `docs/domain-service-map.md`
+- [X] T003 [P] Add non-secret environment reference updates in `.env.example`
+- [X] T004 [P] Add repository hygiene rules in `.gitignore` for `.env`, `.ssh/`, `*.pem`, `*.key`, `acme.json`, `terraform.tfvars`, and `.terraform/`
+- [X] T005 Add GitHub Actions environment variable naming notes in `docs/github-secrets.md`
 
 ---
 
@@ -34,18 +34,18 @@ independently where possible.
 
 **CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T006 Create Terraform provider and backend definitions in `terraform/providers.tf` and `terraform/backend.tf`
-- [ ] T007 Create Terraform input variables with sensitive flags in `terraform/variables.tf`
-- [ ] T008 Create Terraform locals for the 6 approved domain/service mappings in `terraform/locals.tf`
-- [ ] T009 Create EC2, Elastic IP, security group, and key pair resources in `terraform/main.tf`
-- [ ] T010 Create Terraform outputs for EC2 public IP and Elastic IP in `terraform/outputs.tf`
-- [ ] T011 Create Cloudflare site A-record resources only in `terraform/dns.tf` using `cloudflare_dns_record`
-- [ ] T012 Add Terraform user_data bootstrap for Docker and Compose in `terraform/user_data.sh`
-- [ ] T013 Create Traefik static config in `compose/traefik/traefik.yml`
-- [ ] T014 Create baseline Docker Compose services for Traefik and all 6 sites in `compose/docker-compose.yml`
-- [ ] T015 Create deployment helper script in `scripts/deploy.sh`
-- [ ] T016 Create validation helper script skeleton in `scripts/validate.sh`
-- [ ] T017 Create infra deploy workflow skeleton in `.github/workflows/deploy.yml`
+- [X] T006 Create Terraform provider and backend definitions in `terraform/providers.tf` and `terraform/backend.tf`
+- [X] T007 Create Terraform input variables with sensitive flags in `terraform/variables.tf`
+- [X] T008 Create Terraform locals for the 6 approved domain/service mappings in `terraform/locals.tf`
+- [X] T009 Create EC2, Elastic IP, security group, and key pair resources in `terraform/main.tf`
+- [X] T010 Create Terraform outputs for EC2 public IP and Elastic IP in `terraform/outputs.tf`
+- [X] T011 Create Cloudflare site A-record resources only in `terraform/dns.tf` using `cloudflare_dns_record`
+- [X] T012 Add Terraform user_data bootstrap for Docker and Compose in `terraform/user_data.sh`
+- [X] T013 Create Traefik static config in `compose/traefik/traefik.yml`
+- [X] T014 Create baseline Docker Compose services for Traefik and all 6 sites in `compose/docker-compose.yml`
+- [X] T015 Create deployment helper script in `scripts/deploy.sh`
+- [X] T016 Create validation helper script skeleton in `scripts/validate.sh`
+- [X] T017 Create infra deploy workflow skeleton in `.github/workflows/deploy.yml`
 
 **Checkpoint**: Foundation ready - Terraform, Compose, Traefik, deploy, and validation files exist.
 
@@ -60,16 +60,16 @@ visit each over HTTP and confirm HTTPS redirect.
 
 ### Implementation for User Story 1
 
-- [ ] T018 [P] [US1] Add `buyraq` service labels and ECR Public image reference in `compose/docker-compose.yml`
-- [ ] T019 [P] [US1] Add `codehelp` service labels and ECR Public image reference in `compose/docker-compose.yml`
-- [ ] T020 [P] [US1] Add `cosmeticpro` service labels and ECR Public image reference in `compose/docker-compose.yml`
-- [ ] T021 [P] [US1] Add `ddnsteltonicka` service labels and ECR Public image reference in `compose/docker-compose.yml`
-- [ ] T022 [P] [US1] Add `solovkadmytro` service labels and ECR Public image reference in `compose/docker-compose.yml`
-- [ ] T023 [P] [US1] Add `solovkaskincare` service labels and ECR Public image reference in `compose/docker-compose.yml`
-- [ ] T024 [US1] Configure shared Docker network and prevent host port exposure for app services in `compose/docker-compose.yml`
-- [ ] T025 [US1] Configure Traefik HTTP-to-HTTPS redirect and ACME resolver in `compose/traefik/traefik.yml`
-- [ ] T026 [US1] Document manual first-run Compose commands in `docs/runbook.md`
-- [ ] T027 [US1] Add quick validation commands for DNS, HTTPS, and HTTP redirect in `scripts/validate.sh`
+- [X] T018 [P] [US1] Add `buyraq` service labels and ECR Public image reference in `compose/docker-compose.yml`
+- [X] T019 [P] [US1] Add `codehelp` service labels and ECR Public image reference in `compose/docker-compose.yml`
+- [X] T020 [P] [US1] Add `cosmeticpro` service labels and ECR Public image reference in `compose/docker-compose.yml`
+- [X] T021 [P] [US1] Add `ddnsteltonicka` service labels and ECR Public image reference in `compose/docker-compose.yml`
+- [X] T022 [P] [US1] Add `solovkadmytro` service labels and ECR Public image reference in `compose/docker-compose.yml`
+- [X] T023 [P] [US1] Add `solovkaskincare` service labels and ECR Public image reference in `compose/docker-compose.yml`
+- [X] T024 [US1] Configure shared Docker network and prevent host port exposure for app services in `compose/docker-compose.yml`
+- [X] T025 [US1] Configure Traefik HTTP-to-HTTPS redirect and ACME resolver in `compose/traefik/traefik.yml`
+- [X] T026 [US1] Document manual first-run Compose commands in `docs/runbook.md`
+- [X] T027 [US1] Add quick validation commands for DNS, HTTPS, and HTTP redirect in `scripts/validate.sh`
 
 **Checkpoint**: User Story 1 is independently testable via DNS, HTTPS, and redirect checks.
 
@@ -85,15 +85,15 @@ pulled and refreshed by infra-repo.
 
 ### Implementation for User Story 2
 
-- [ ] T028 [P] [US2] Create app-repo workflow template in `templates/app-repo/.github/workflows/build.yml`
-- [ ] T029 [P] [US2] Create app-repo Dockerfile template in `templates/app-repo/Dockerfile`
-- [ ] T030 [P] [US2] Create app-repo static page template in `templates/app-repo/index.html`
-- [ ] T031 [US2] Add ECR Public login and push steps to `templates/app-repo/.github/workflows/build.yml`
-- [ ] T032 [US2] Add commit-SHA and `latest` image tagging to `templates/app-repo/.github/workflows/build.yml`
-- [ ] T033 [US2] Add repository_dispatch payload to `templates/app-repo/.github/workflows/build.yml`
-- [ ] T034 [US2] Add dispatch event validation for `service_name`, `image_tag`, and `domain` in `.github/workflows/deploy.yml`
-- [ ] T035 [US2] Implement changed-service pull and restart flow in `scripts/deploy.sh`
-- [ ] T036 [US2] Document app-repo secret requirements in `docs/github-secrets.md`
+- [X] T028 [P] [US2] Create app-repo workflow template in `templates/app-repo/.github/workflows/build.yml`
+- [X] T029 [P] [US2] Create app-repo Dockerfile template in `templates/app-repo/Dockerfile`
+- [X] T030 [P] [US2] Create app-repo static page template in `templates/app-repo/index.html`
+- [X] T031 [US2] Add ECR Public login and push steps to `templates/app-repo/.github/workflows/build.yml`
+- [X] T032 [US2] Add commit-SHA and `latest` image tagging to `templates/app-repo/.github/workflows/build.yml`
+- [X] T033 [US2] Add repository_dispatch payload to `templates/app-repo/.github/workflows/build.yml`
+- [X] T034 [US2] Add dispatch event validation for `service_name`, `image_tag`, and `domain` in `.github/workflows/deploy.yml`
+- [X] T035 [US2] Implement changed-service pull and restart flow in `scripts/deploy.sh`
+- [X] T036 [US2] Document app-repo secret requirements in `docs/github-secrets.md`
 
 **Checkpoint**: User Story 2 is independently testable by triggering a dispatch for one service.
 
@@ -109,15 +109,15 @@ break one check in a safe branch and confirm workflow failure.
 
 ### Implementation for User Story 3
 
-- [ ] T037 [P] [US3] Implement Terraform validate and plan steps in `.github/workflows/deploy.yml`
-- [ ] T038 [P] [US3] Implement DNS resolution checks for all 6 domains in `scripts/validate.sh`
-- [ ] T039 [P] [US3] Implement HTTPS health checks for all 6 domains in `scripts/validate.sh`
-- [ ] T040 [P] [US3] Implement HTTP-to-HTTPS redirect checks for all 6 domains in `scripts/validate.sh`
-- [ ] T041 [US3] Implement ECR Public intended digest lookup in `scripts/validate.sh`
-- [ ] T042 [US3] Implement running container digest comparison in `scripts/validate.sh`
-- [ ] T043 [US3] Add GitHub Actions annotation output for validation failures in `scripts/validate.sh`
-- [ ] T044 [US3] Wire deploy workflow triggers for `repository_dispatch` and push/merge to infra `main` in `.github/workflows/deploy.yml`
-- [ ] T045 [US3] Add validation suite documentation cross-reference in `docs/runbook.md`
+- [X] T037 [P] [US3] Implement Terraform validate and plan steps in `.github/workflows/deploy.yml`
+- [X] T038 [P] [US3] Implement DNS resolution checks for all 6 domains in `scripts/validate.sh`
+- [X] T039 [P] [US3] Implement HTTPS health checks for all 6 domains in `scripts/validate.sh`
+- [X] T040 [P] [US3] Implement HTTP-to-HTTPS redirect checks for all 6 domains in `scripts/validate.sh`
+- [X] T041 [US3] Implement ECR Public intended digest lookup in `scripts/validate.sh`
+- [X] T042 [US3] Implement running container digest comparison in `scripts/validate.sh`
+- [X] T043 [US3] Add GitHub Actions annotation output for validation failures in `scripts/validate.sh`
+- [X] T044 [US3] Wire deploy workflow triggers for `repository_dispatch` and push/merge to infra `main` in `.github/workflows/deploy.yml`
+- [X] T045 [US3] Add validation suite documentation cross-reference in `docs/runbook.md`
 
 **Checkpoint**: User Story 3 is independently testable by running the deploy workflow validation.
 
@@ -132,10 +132,10 @@ updated; any non-site DNS change blocks apply.
 
 ### Implementation for User Story 4
 
-- [ ] T046 [US4] Restrict Cloudflare Terraform resources to the 6 approved site A-records in `terraform/dns.tf`
-- [ ] T047 [US4] Add comments warning against mail/non-site DNS ownership in `terraform/dns.tf`
-- [ ] T048 [US4] Add plan review checklist for DNS safety in `docs/runbook.md`
-- [ ] T049 [US4] Add workflow failure guidance for non-site DNS plan changes in `.github/workflows/deploy.yml`
+- [X] T046 [US4] Restrict Cloudflare Terraform resources to the 6 approved site A-records in `terraform/dns.tf`
+- [X] T047 [US4] Add comments warning against mail/non-site DNS ownership in `terraform/dns.tf`
+- [X] T048 [US4] Add plan review checklist for DNS safety in `docs/runbook.md`
+- [X] T049 [US4] Add workflow failure guidance for non-site DNS plan changes in `.github/workflows/deploy.yml`
 
 **Checkpoint**: User Story 4 is independently testable by inspecting Terraform plan output.
 
@@ -145,13 +145,13 @@ updated; any non-site DNS change blocks apply.
 
 **Purpose**: Final validation, docs, and safety checks across the whole project.
 
-- [ ] T050 [P] Update `README.md` with project purpose, repository roles, and Phase 1 definition of done
-- [ ] T051 [P] Update `docs/github-secrets.md` with infra-repo and app-repo secret matrix
-- [ ] T052 [P] Update `docs/runbook.md` with rollback and failed-validation handling
-- [ ] T053 Run `terraform fmt -recursive` against `terraform/`
-- [ ] T054 Run `terraform validate` in `terraform/`
-- [ ] T055 Run `docker compose -f compose/docker-compose.yml config`
-- [ ] T056 Run quickstart validation steps from `specs/001-infra-static-sites/quickstart.md`
+- [X] T050 [P] Update `README.md` with project purpose, repository roles, and Phase 1 definition of done
+- [X] T051 [P] Update `docs/github-secrets.md` with infra-repo and app-repo secret matrix
+- [X] T052 [P] Update `docs/runbook.md` with rollback and failed-validation handling
+- [X] T053 Run `terraform fmt -recursive` against `terraform/`
+- [X] T054 Run `terraform validate` in `terraform/`
+- [X] T055 Run `docker compose -f compose/docker-compose.yml config`
+- [X] T056 Run quickstart validation steps from `specs/001-infra-static-sites/quickstart.md`
 
 ---
 

@@ -1,0 +1,95 @@
+services:
+  traefik:
+    image: traefik:v3.1
+    restart: unless-stopped
+    command:
+      - "--configFile=/etc/traefik/traefik.yml"
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - web
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
+      - "letsencrypt:/letsencrypt"
+
+  buyraq:
+    image: "public.ecr.aws/${ECR_PUBLIC_ALIAS}/buyraq:${BUYRAQ_TAG:-latest}"
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.buyraq.rule=Host(`buyraq.com`)"
+      - "traefik.http.routers.buyraq.entrypoints=websecure"
+      - "traefik.http.routers.buyraq.tls.certresolver=letsencrypt"
+      - "traefik.http.services.buyraq.loadbalancer.server.port=80"
+
+  codehelp:
+    image: "public.ecr.aws/${ECR_PUBLIC_ALIAS}/codehelp:${CODEHELP_TAG:-latest}"
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.codehelp.rule=Host(`codehelp.pp.ua`)"
+      - "traefik.http.routers.codehelp.entrypoints=websecure"
+      - "traefik.http.routers.codehelp.tls.certresolver=letsencrypt"
+      - "traefik.http.services.codehelp.loadbalancer.server.port=80"
+
+  cosmeticpro:
+    image: "public.ecr.aws/${ECR_PUBLIC_ALIAS}/cosmeticpro:${COSMETICPRO_TAG:-latest}"
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cosmeticpro.rule=Host(`cosmeticpro.pp.ua`)"
+      - "traefik.http.routers.cosmeticpro.entrypoints=websecure"
+      - "traefik.http.routers.cosmeticpro.tls.certresolver=letsencrypt"
+      - "traefik.http.services.cosmeticpro.loadbalancer.server.port=80"
+
+  ddnsteltonicka:
+    image: "public.ecr.aws/${ECR_PUBLIC_ALIAS}/ddnsteltonicka:${DDNSTELTONICKA_TAG:-latest}"
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ddnsteltonicka.rule=Host(`ddnsteltonicka.pp.ua`)"
+      - "traefik.http.routers.ddnsteltonicka.entrypoints=websecure"
+      - "traefik.http.routers.ddnsteltonicka.tls.certresolver=letsencrypt"
+      - "traefik.http.services.ddnsteltonicka.loadbalancer.server.port=80"
+
+  solovkadmytro:
+    image: "public.ecr.aws/${ECR_PUBLIC_ALIAS}/solovkadmytro:${SOLOVKADMYTRO_TAG:-latest}"
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.solovkadmytro.rule=Host(`solovkadmytro.pp.ua`)"
+      - "traefik.http.routers.solovkadmytro.entrypoints=websecure"
+      - "traefik.http.routers.solovkadmytro.tls.certresolver=letsencrypt"
+      - "traefik.http.services.solovkadmytro.loadbalancer.server.port=80"
+
+  solovkaskincare:
+    image: "public.ecr.aws/${ECR_PUBLIC_ALIAS}/solovkaskincare:${SOLOVKASKINCARE_TAG:-latest}"
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.solovkaskincare.rule=Host(`solovkaskincare.pp.ua`)"
+      - "traefik.http.routers.solovkaskincare.entrypoints=websecure"
+      - "traefik.http.routers.solovkaskincare.tls.certresolver=letsencrypt"
+      - "traefik.http.services.solovkaskincare.loadbalancer.server.port=80"
+
+networks:
+  web:
+    name: web
+    driver: bridge
+
+volumes:
+  letsencrypt:

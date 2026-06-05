@@ -1,0 +1,15 @@
+.git/
+.github/
+.specify/
+.cursor/
+specs/
+docs/
+terraform/
+scripts/
+.env*
+.ssh/
+*.pem
+*.key
+acme.json
+*.tfstate*
+.terraform/

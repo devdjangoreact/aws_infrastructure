@@ -1,2 +1,10 @@
 .env
 .ssh/
+*.pem
+*.key
+acme.json
+terraform.tfvars
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
