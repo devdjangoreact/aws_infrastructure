@@ -1,13 +1,13 @@
 variable "aws_region" {
-  description = "AWS region. ECR Public API requires us-east-1."
+  description = "AWS region for EC2/EIP/state (any region). ECR Public uses its own us-east-1 provider."
   type        = string
   default     = "us-east-1"
 }
 
 variable "instance_type" {
-  description = "EC2 instance type (free-tier eligible)."
+  description = "EC2 instance type (free-tier eligible). Newer accounts use t3.micro; older ones may use t2.micro."
   type        = string
-  default     = "t2.micro"
+  default     = "t3.micro"
 }
 
 variable "ssh_allowed_cidrs" {

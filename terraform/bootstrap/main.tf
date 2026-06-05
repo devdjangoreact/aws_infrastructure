@@ -27,10 +27,18 @@ variable "aws_region" {
 variable "bucket_name" {
   description = "Name of the S3 bucket for Terraform remote state (AWS_BUCKET_NAME)."
   type        = string
+
+  validation {
+    condition     = can(regex("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$", var.bucket_name)) && !can(regex("_", var.bucket_name))
+    error_message = "S3 bucket names must be 3-63 chars, lowercase letters/numbers/dots/hyphens only, and cannot contain underscores."
+  }
 }
 
 resource "aws_s3_bucket" "state" {
   bucket = var.bucket_name
+
+  # Allow `terraform destroy` to remove the bucket even if it still holds state versions.
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_versioning" "state" {

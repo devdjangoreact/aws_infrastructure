@@ -14,15 +14,18 @@ terraform {
       source  = "hashicorp/tls"
       version = "~> 4.0"
     }
-    local = {
-      source  = "hashicorp/local"
-      version = "~> 2.0"
-    }
   }
 }
 
 provider "aws" {
   region = var.aws_region
+}
+
+# ECR Public is a global service exposed only through us-east-1; pin a dedicated provider for it
+# so the rest of the infrastructure can live in any region (e.g. eu-central-1).
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
 }
 
 provider "cloudflare" {

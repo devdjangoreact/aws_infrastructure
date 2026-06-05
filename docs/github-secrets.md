@@ -13,7 +13,7 @@ git-ignored `.env` and in GitHub; see `.env.example` for the variable list.
 | `CLOUDFLARE_EMAIL` | Cloudflare account email |
 | `AWS_ACCESS_KEY_ID` | AWS credentials (EC2, S3 state, ECR Public) |
 | `AWS_SECRET_ACCESS_KEY` | AWS credentials |
-| `AWS_REGION` | `us-east-1` |
+| `AWS_REGION` | EC2/S3 state region, e.g. `eu-central-1` (ECR Public always uses `us-east-1` internally) |
 | `AWS_BUCKET_NAME` | S3 bucket for Terraform remote state (native S3 locking, no DynamoDB) |
 | `ECR_PUBLIC_ALIAS` | Amazon ECR Public registry alias |
 | `EC2_HOST` | EC2 host/IP for SSH deploy |

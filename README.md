@@ -1,8 +1,8 @@
 # Static Sites Infrastructure (infra-repo)
 
 Reproducible, automated infrastructure that runs 6 containerized static websites on a single AWS
-free-tier EC2 instance, routed by Traefik over HTTPS, with DNS in Cloudflare and images in Amazon
-ECR Public. CI/CD is split across 7 repositories.
+free-tier EC2 instance (`t3.micro`, or `t2.micro` on older accounts), routed by Traefik over HTTPS,
+with DNS in Cloudflare and images in Amazon ECR Public. CI/CD is split across 7 repositories.
 
 ## Repository roles
 

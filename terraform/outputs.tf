@@ -13,7 +13,13 @@ output "ecr_repository_uris" {
   value       = { for k, r in aws_ecrpublic_repository.site : k => r.repository_uri }
 }
 
-output "ssh_private_key_path" {
-  description = "Local path to the generated deploy private key (git-ignored)."
-  value       = local_sensitive_file.deploy_private_key.filename
+output "ssh_private_key" {
+  description = "Generated deploy private key (OpenSSH). Written locally by the orchestrator."
+  value       = tls_private_key.deploy.private_key_openssh
+  sensitive   = true
+}
+
+output "ssh_public_key" {
+  description = "Generated deploy public key (OpenSSH)."
+  value       = tls_private_key.deploy.public_key_openssh
 }

@@ -4,7 +4,27 @@
 *.key
 acme.json
 terraform.tfvars
+*.tfvars.json
 .terraform/
 *.tfstate
 *.tfstate.*
 .terraform.lock.hcl
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Logs
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db

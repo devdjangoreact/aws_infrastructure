@@ -152,6 +152,7 @@ updated; any non-site DNS change blocks apply.
 - [X] T054 Run `terraform validate` in `terraform/`
 - [X] T055 Run `docker compose -f compose/docker-compose.yml config`
 - [X] T056 Run quickstart validation steps from `specs/001-infra-static-sites/quickstart.md`
+- [X] T057 [P] Add security gates workflow `.github/workflows/security.yml` (Gitleaks secret scan, TFLint, Checkov IaC scan, Trivy container/config scan, ShellCheck)
 
 ---
 

@@ -1,7 +1,11 @@
 services:
   traefik:
-    image: traefik:v3.1
+    image: traefik:v3.7
     restart: unless-stopped
+    environment:
+      # The EC2 Docker daemon requires API >= 1.40; pin the Traefik docker client so it
+      # does not fall back to the unsupported default API version 1.24.
+      - "DOCKER_API_VERSION=1.44"
     command:
       - "--configFile=/etc/traefik/traefik.yml"
     ports:

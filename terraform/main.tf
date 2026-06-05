@@ -1,18 +1,8 @@
-# Generate the deploy SSH key pair (written locally, git-ignored under .ssh/).
+# Generate the deploy SSH key pair. The private key is exposed only as a sensitive output so the
+# orchestrator can write it to .ssh/ locally; Terraform itself does not manage any on-disk files
+# (that avoids spurious "drift" in CI runners where the local files do not exist).
 resource "tls_private_key" "deploy" {
   algorithm = "ED25519"
-}
-
-resource "local_sensitive_file" "deploy_private_key" {
-  content         = tls_private_key.deploy.private_key_openssh
-  filename        = "${path.module}/../.ssh/project_key"
-  file_permission = "0600"
-}
-
-resource "local_file" "deploy_public_key" {
-  content         = tls_private_key.deploy.public_key_openssh
-  filename        = "${path.module}/../.ssh/project_key.pub"
-  file_permission = "0644"
 }
 
 resource "aws_key_pair" "deploy" {
@@ -86,6 +76,7 @@ resource "aws_eip" "web" {
 # One Amazon ECR Public repository per service (created by this repo).
 resource "aws_ecrpublic_repository" "site" {
   for_each = local.services
+  provider = aws.us_east_1
 
   repository_name = each.value
 }
