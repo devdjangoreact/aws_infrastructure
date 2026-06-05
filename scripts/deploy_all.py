@@ -208,18 +208,25 @@ def phase_apply(env: dict[str, str], auto_approve: bool) -> None:
         "TF_VAR_cloudflare_api_token": env["CLOUDFLARE_API_TOKEN"],
         "TF_VAR_aws_region": region,
     }
-    run(
-        ["terraform", "init", "-input=false",
-         f"-backend-config=bucket={env['AWS_BUCKET_NAME']}",
-         f"-backend-config=region={region}"],
-        cwd=tdir,
-    )
+    terraform_init(env, tdir)
     run(["terraform", "plan", "-input=false"], cwd=tdir, extra_env=tf_env)
     if not auto_approve:
         ans = input("[deploy] Review the plan above. Type 'yes' to apply: ").strip().lower()
         if ans != "yes":
             die("aborted by user before apply")
     run(["terraform", "apply", "-auto-approve", "-input=false"], cwd=tdir, extra_env=tf_env)
+
+
+def terraform_init(env: dict[str, str], tdir: Path) -> None:
+    require(env, "AWS_BUCKET_NAME")
+    validate_s3_bucket_name(env["AWS_BUCKET_NAME"])
+    region = env.get("AWS_REGION", "us-east-1")
+    run(
+        ["terraform", "init", "-input=false", "-reconfigure",
+         f"-backend-config=bucket={env['AWS_BUCKET_NAME']}",
+         f"-backend-config=region={region}"],
+        cwd=tdir,
+    )
 
 
 def write_ssh_key(tdir: Path) -> None:
@@ -278,6 +285,7 @@ def _restrict_key_permissions(key_path: Path) -> None:
 def phase_outputs(env: dict[str, str]) -> dict[str, str]:
     step("Phase 4: read terraform outputs and update .env")
     tdir = REPO_ROOT / "terraform"
+    terraform_init(env, tdir)
     raw = run_capture(["terraform", "output", "-json"], cwd=tdir)
     outputs = json.loads(raw)
 
@@ -510,24 +518,30 @@ def _ensure_branch_pushed(repo: str, token: str, branch: str) -> None:
 
 
 def validate_aws_credentials(env: dict[str, str]) -> None:
-    """Verify the AWS credentials from .env before syncing them to GitHub Secrets."""
+    """Verify the AWS credentials from .env before syncing them to GitHub Secrets.
+
+    The .env values are validated in isolation: any ambient AWS_* variables (e.g. a stale
+    AWS_SESSION_TOKEN or AWS_PROFILE left in the shell) are stripped so we test exactly the keys
+    that get pushed to GitHub Secrets, not whatever the local shell happens to hold.
+    """
     require(env, "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION")
-    aws_env = {
-        "AWS_ACCESS_KEY_ID": env["AWS_ACCESS_KEY_ID"],
-        "AWS_SECRET_ACCESS_KEY": env["AWS_SECRET_ACCESS_KEY"],
-        "AWS_REGION": env["AWS_REGION"],
-    }
+    clean_env = {k: v for k, v in os.environ.items() if not k.startswith("AWS_")}
+    clean_env["AWS_ACCESS_KEY_ID"] = env["AWS_ACCESS_KEY_ID"]
+    clean_env["AWS_SECRET_ACCESS_KEY"] = env["AWS_SECRET_ACCESS_KEY"]
+    clean_env["AWS_REGION"] = env["AWS_REGION"]
+    clean_env["AWS_DEFAULT_REGION"] = env["AWS_REGION"]
     if env.get("AWS_SESSION_TOKEN"):
-        aws_env["AWS_SESSION_TOKEN"] = env["AWS_SESSION_TOKEN"]
+        clean_env["AWS_SESSION_TOKEN"] = env["AWS_SESSION_TOKEN"]
     result = subprocess.run(
         ["aws", "sts", "get-caller-identity"],
-        env={**os.environ, **aws_env},
+        env=clean_env,
         capture_output=True,
         text=True,
     )
     if result.returncode != 0:
         die("AWS credentials from .env are invalid; update AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY"
-            " (and AWS_SESSION_TOKEN if these are temporary credentials), then rerun")
+            " (and AWS_SESSION_TOKEN if these are temporary credentials), then rerun\n"
+            + result.stderr.strip())
     log("AWS credentials verified")
 
 
@@ -657,12 +671,7 @@ def phase_destroy(env: dict[str, str], auto_approve: bool, include_bucket: bool)
     empty_ecr_public_repos()
 
     tdir = REPO_ROOT / "terraform"
-    run(
-        ["terraform", "init", "-input=false",
-         f"-backend-config=bucket={env['AWS_BUCKET_NAME']}",
-         f"-backend-config=region={region}"],
-        cwd=tdir,
-    )
+    terraform_init(env, tdir)
     run(["terraform", "destroy", "-auto-approve", "-input=false"], cwd=tdir, extra_env=tf_env)
     log("main infrastructure destroyed")
 
