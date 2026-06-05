@@ -28,3 +28,6 @@ venv/
 # OS / editor
 .DS_Store
 Thumbs.db
+
+# GitHub run logs
+.github-run-logs/
