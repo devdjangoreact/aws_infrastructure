@@ -547,8 +547,25 @@ def phase_secrets(env: dict[str, str]) -> None:
     log(f"pushed {len(secrets)} secret(s) to {repo}")
 
 
+def _push_head_to_main(token: str) -> None:
+    """Push the current commit to origin/main (the only trigger for the deploy workflow).
+
+    The token is passed via an inline http.extraHeader and is never logged.
+    """
+    basic = base64.b64encode(f"x-access-token:{token}".encode()).decode()
+    proc_env = os.environ.copy()
+    proc_env["GIT_TERMINAL_PROMPT"] = "0"
+    log("$ git push origin HEAD:main")
+    result = subprocess.run(
+        ["git", "-c", f"http.extraHeader=Authorization: Basic {basic}", "push", "origin", "HEAD:main"],
+        env=proc_env,
+    )
+    if result.returncode != 0:
+        die("git push to main failed (main may have diverged; merge origin/main locally and retry)")
+
+
 def phase_github(env: dict[str, str]) -> None:
-    step("Prepare GitHub Actions and trigger deploy workflow")
+    step("Sync secrets and promote to main (Actions deploys on main push only)")
     token = _github_token(env)
     repo = _repo_slug()
     branch = _current_branch()
@@ -557,9 +574,10 @@ def phase_github(env: dict[str, str]) -> None:
     env = phase_outputs(env)
     phase_secrets(env)
 
+    # Infra updates run only when main advances; push the committed HEAD onto main.
     _ensure_branch_pushed(repo, token, branch)
-    _gh_request("POST", f"/repos/{repo}/actions/workflows/deploy.yml/dispatches", token, {"ref": branch})
-    log(f"triggered GitHub Actions workflow_dispatch for deploy.yml on branch '{branch}'")
+    _push_head_to_main(token)
+    log(f"pushed '{branch}' -> main; GitHub Actions 'Deploy' runs on the main push")
 
 
 def empty_ecr_public_repos() -> None:
@@ -672,7 +690,8 @@ def _wait_https(domain: str, wait: int) -> bool:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Phased deploy orchestrator")
     parser.add_argument("--phase", default="all", choices=["all", *PHASES, *EXTRA_PHASES],
-                        help="run a single phase, 'all', 'destroy', 'secrets', or 'github'")
+                        help="run a single phase, 'all', 'destroy', 'secrets', or 'github' "
+                             "(github: sync secrets + push HEAD to main to trigger deploy)")
     parser.add_argument("--yes", action="store_true", help="non-interactive: auto-approve apply/destroy")
     parser.add_argument("--dns-dry-run", action="store_true", help="preflight: only list apex A-records")
     parser.add_argument("--https-wait", type=int, default=120,
