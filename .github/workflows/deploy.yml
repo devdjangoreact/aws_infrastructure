@@ -1,10 +1,11 @@
 name: Deploy
 
 on:
-  # Infrastructure updates are triggered only by Security after a successful push/merge to main.
+  # Infrastructure updates are called by security.yml after a successful push/merge to main.
+  workflow_call:
   # App-repos signal a single-service redeploy after pushing a new image (not a branch push).
   repository_dispatch:
-    types: [deploy, infra-deploy]
+    types: [deploy]
 
 permissions:
   contents: read

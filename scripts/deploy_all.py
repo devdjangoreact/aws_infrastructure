@@ -36,6 +36,7 @@ import time
 import urllib.error
 import urllib.request
 from pathlib import Path
+from typing import NoReturn
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ENV_FILE = REPO_ROOT / ".env"
@@ -568,10 +569,6 @@ def phase_secrets(env: dict[str, str]) -> None:
     missing = [k for k in SECRET_ENV_KEYS if k not in secrets]
     if missing:
         log(f"warning: skipping unset .env keys: {', '.join(missing)}")
-    dispatch_token = env.get("INFRA_REPO_DISPATCH_TOKEN") or env.get("GITHUB_TOKEN")
-    if dispatch_token:
-        secrets["INFRA_REPO_DISPATCH_TOKEN"] = dispatch_token
-
     key_file = REPO_ROOT / ".ssh" / "project_key"
     if key_file.exists():
         secrets["EC2_SSH_PRIVATE_KEY"] = key_file.read_text(encoding="utf-8")
