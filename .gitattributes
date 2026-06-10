@@ -1,0 +1,5 @@
+# Shell scripts must always use LF so they run on the Linux EC2 host
+# (avoids "set: pipefail" / "\r" errors when copied from Windows).
+*.sh text eol=lf
+scripts/*.sh text eol=lf
+compose/**/*.sh text eol=lf
