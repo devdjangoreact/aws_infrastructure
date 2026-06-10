@@ -1,0 +1,18 @@
+[submodule "sites/course_hub"]
+	path = sites/course_hub
+	url = https://github.com/devdjangoreact/course_hub.git
+[submodule "sites/cosmetic"]
+	path = sites/cosmetic
+	url = https://github.com/devdjangoreact/cosmetic.git
+[submodule "sites/apifypro"]
+	path = sites/apifypro
+	url = https://github.com/devdjangoreact/apifypro.git
+[submodule "sites/botnet"]
+	path = sites/botnet
+	url = https://github.com/devdjangoreact/botnet.git
+[submodule "sites/arbitrator"]
+	path = sites/arbitrator
+	url = https://github.com/devdjangoreact/arbitrator.git
+[submodule "sites/lengia"]
+	path = sites/lengia
+	url = https://github.com/devdjangoreact/lengia.git
