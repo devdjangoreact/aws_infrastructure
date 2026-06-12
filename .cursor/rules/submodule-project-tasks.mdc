@@ -1,0 +1,40 @@
+---
+description: Spec Kit work that targets a specific project must happen in that project's submodule
+alwaysApply: true
+---
+
+# Per-Project (Submodule) Spec Kit Tasks
+
+Each project under `sites/<project>` is a separate Git submodule with its own
+repository (see `.gitmodules`). When a Spec Kit task concerns one specific
+project, do all project work inside that project's submodule, not in the root
+`infra` repo.
+
+## Rules
+
+1. If the task targets a single project, create the feature branch inside that
+   project's submodule directory (`sites/<project>`), not in the `infra` root.
+2. Commit and push the project code in that submodule's repository.
+3. Run Spec Kit branch/spec commands (e.g. `speckit-git-feature`,
+   `speckit-specify`) with the working directory set to `sites/<project>`.
+4. Only commit in the root `infra` repo when you intentionally want to update the
+   submodule pointer (the recorded commit) for that project.
+5. Cross-project or infra-wide tasks stay in the root `infra` repo as usual.
+
+## Submodule Isolation (For Agents)
+
+The submodules under `sites/<project>` are **independent, unrelated projects**.
+They do not share code, types, or conventions with each other or with `infra`.
+
+1. Never search for, read, or reuse code from one submodule when working in a
+   different submodule. Treat each `sites/<project>` as a fully isolated repo.
+2. When a task targets a project, scope all searching, reading, and editing to
+   that project's directory (`sites/<project>`) only.
+3. The root `infra` repo is **only** about deployment and infrastructure
+   provisioning. It contains only:
+   - general code-writing rules, and
+   - rules for agents.
+4. Individual, project-specific rules must live in and be read only from that
+   project's own rules (e.g. `sites/<project>/.cursor/rules/`). Do not add
+   project-specific rules to the root `infra` repo, and do not assume `infra`
+   rules cover project-specific behavior.
